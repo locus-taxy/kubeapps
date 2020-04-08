@@ -64,14 +64,15 @@ type ChartIconString struct {
 
 // ChartVersion is a representation of a specific version of a chart
 type ChartVersion struct {
-	Version    string    `json:"version"`
-	AppVersion string    `json:"app_version"`
-	Created    time.Time `json:"created"`
-	Digest     string    `json:"digest"`
-	URLs       []string  `json:"urls"`
-	Readme     string    `json:"readme" bson:"-"`
-	Values     string    `json:"values" bson:"-"`
-	Schema     string    `json:"schema" bson:"-"`
+	Version     string    `json:"version"`
+	AppVersion  string    `json:"app_version"`
+	Created     time.Time `json:"created"`
+	Description string    `json:"description"`
+	Digest      string    `json:"digest"`
+	URLs        []string  `json:"urls"`
+	Readme      string    `json:"readme" bson:"-"`
+	Values      string    `json:"values" bson:"-"`
+	Schema      string    `json:"schema" bson:"-"`
 }
 
 // ChartFiles holds the README and values for a given chart version

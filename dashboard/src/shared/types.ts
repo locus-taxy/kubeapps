@@ -48,6 +48,7 @@ export interface IChartVersionAttributes {
   version: string;
   app_version: string;
   created: string;
+  description: string;
 }
 
 export interface IChart {
@@ -378,6 +379,8 @@ export interface IAppOverview {
   icon?: string;
   status: string;
   chart: string;
+  description: string;
+  appVersion: string;
   chartMetadata: hapi.chart.Metadata;
   // UpdateInfo is internally populated
   updateInfo?: IChartUpdateInfo;

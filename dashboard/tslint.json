@@ -3,11 +3,13 @@
   "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
   "jsRules": {},
   "rules": {
+    "jsx-no-lambda": false,
+    "ordered-imports": [false],
+    "object-literal-sort-keys": [false],
+    "quotemark": [true, "avoid-template", "avoid-escape"],
     "no-console": {
       "severity": "warning"
-    },
-    "object-literal-sort-keys": false,
-    "quotemark": [true, "avoid-template", "avoid-escape"]
+    }
   },
   "rulesDirectory": []
 }

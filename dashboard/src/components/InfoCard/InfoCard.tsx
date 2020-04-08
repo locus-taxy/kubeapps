@@ -12,6 +12,7 @@ export interface IServiceInstanceCardProps {
   icon?: string;
   banner?: string;
   description?: string | JSX.Element;
+  appVersion?: string | JSX.Element;
   tag1Class?: string;
   tag1Content?: string | JSX.Element;
   tag2Class?: string;
@@ -24,6 +25,7 @@ const InfoCard: React.SFC<IServiceInstanceCardProps> = props => {
     link,
     info,
     description,
+    appVersion,
     tag1Content,
     tag1Class,
     tag2Content,
@@ -42,7 +44,13 @@ const InfoCard: React.SFC<IServiceInstanceCardProps> = props => {
           <Link to={link || "#"} title={title}>
             <h3 className="ListItem__content__title type-big">{title}</h3>
           </Link>
-          {description}
+          <p>
+            <strong>Running Version: </strong>
+            {appVersion}
+            <br />
+            <strong>Description: </strong>
+            {description}
+          </p>
           <div className="ListItem__content__info">
             <p className="margin-reset type-small padding-t-tiny type-color-light-blue">{info}</p>
             <div>

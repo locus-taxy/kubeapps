@@ -307,7 +307,7 @@ func newChartResponse(c *models.Chart) *apiResponse {
 		Links:      selfLink{pathPrefix + "/charts/" + c.ID},
 		Relationships: relMap{
 			"latestChartVersion": rel{
-				Data:  chartVersionAttributes(c.ID, latestCV),
+				Data:  chartVersionAttributes(c.ID, latestCV, c.Description),
 				Links: selfLink{pathPrefix + "/charts/" + c.ID + "/versions/" + latestCV.Version},
 			},
 		},
@@ -331,9 +331,10 @@ func newChartListResponse(charts []*models.Chart) apiListResponse {
 	return cl
 }
 
-func chartVersionAttributes(cid string, cv models.ChartVersion) models.ChartVersion {
+func chartVersionAttributes(cid string, cv models.ChartVersion, description string) models.ChartVersion {
 	cv.Readme = pathPrefix + "/assets/" + cid + "/versions/" + cv.Version + "/README.md"
 	cv.Values = pathPrefix + "/assets/" + cid + "/versions/" + cv.Version + "/values.yaml"
+	cv.Description = description
 	return cv
 }
 
@@ -351,7 +352,7 @@ func newChartVersionResponse(c *models.Chart, cv models.ChartVersion) *apiRespon
 	return &apiResponse{
 		Type:       "chartVersion",
 		ID:         fmt.Sprintf("%s-%s", c.ID, cv.Version),
-		Attributes: chartVersionAttributes(c.ID, cv),
+		Attributes: chartVersionAttributes(c.ID, cv, c.Description),
 		Links:      selfLink{pathPrefix + "/charts/" + c.ID + "/versions/" + cv.Version},
 		Relationships: relMap{
 			"chart": rel{
