@@ -101,7 +101,7 @@ class DeploymentFormBody extends React.Component<
           <DeploymentTableList
             key={"chartVersion"}
             versions={versions}
-            onDeleteFun={this.handleChartVersionChange}
+            onVersionChange={this.handleChartVersionChange}
             releaseVersion={this.props.releaseVersion}
           />
         </div>

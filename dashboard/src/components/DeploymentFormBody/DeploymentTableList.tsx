@@ -18,7 +18,7 @@ import { IChartVersion } from "../../shared/types";
 
 interface IProps {
   versions: IChartVersion[];
-  onDeleteFun: any;
+  onVersionChange: any;
   releaseVersion?: string;
 }
 
@@ -152,7 +152,7 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-export default function DeploymentTableList({ versions, onDeleteFun, releaseVersion }: IProps) {
+export default function DeploymentTableList({ versions, onVersionChange, releaseVersion }: IProps) {
   const classes = useStyles();
   const [selected, setSelected] = React.useState<string>();
   const [page, setPage] = React.useState(0);
@@ -160,8 +160,8 @@ export default function DeploymentTableList({ versions, onDeleteFun, releaseVers
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   const handleClick = (name: string) => {
-    onDeleteFun(name);
     setSelected(name);
+    onVersionChange(name);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
