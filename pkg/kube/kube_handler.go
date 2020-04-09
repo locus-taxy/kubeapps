@@ -149,9 +149,14 @@ func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
 				// A non empty value is required to override, it seems.
 				TokenFile: " ",
 			},
+			ClusterInfo: clientcmdapi.Cluster{
+				Server:                   "https://35.200.215.243:443",
+				InsecureSkipTLSVerify:    true,
+				CertificateAuthority:     " ",
+				CertificateAuthorityData: []byte{},
+			},
 		},
 	)
-
 	config, err := clientConfig.ClientConfig()
 	if err != nil {
 		return nil, err
