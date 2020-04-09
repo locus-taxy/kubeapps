@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -47,7 +46,6 @@ func init() {
 func main() {
 	pflag.Parse()
 	settings.Init(pflag.CommandLine)
-	fmt.Print(settings)
 	kubeappsNamespace := os.Getenv("POD_NAMESPACE")
 	if kubeappsNamespace == "" {
 		log.Fatal("POD_NAMESPACE should be defined")
