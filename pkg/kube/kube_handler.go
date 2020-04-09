@@ -157,7 +157,10 @@ func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
 		return nil, err
 	}
 	fmt.Println("Handler")
-	fmt.Print(config)
+	fmt.Print(clientConfig.ClientConfig(), "\n")
+	fmt.Print(clientConfig.ConfigAccess(), "\n")
+	fmt.Print(clientConfig.Namespace(),"\n")
+	fmt.Print(clientConfig.RawConfig())
 	fmt.Print("\nEND\n")
 	svcRestConfig, err := rest.InClusterConfig()
 	if err != nil {
