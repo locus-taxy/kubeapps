@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -24,6 +25,7 @@ import (
 
 var (
 	settings         environment.EnvSettings
+	kubeConfig       string
 	assetsvcURL      string
 	helmDriverArg    string
 	userAgentComment string
@@ -35,6 +37,7 @@ func init() {
 	settings.AddFlags(pflag.CommandLine)
 	pflag.StringVar(&assetsvcURL, "assetsvc-url", "https://kubeapps-internal-assetsvc:8080", "URL to the internal assetsvc")
 	pflag.StringVar(&helmDriverArg, "helm-driver", "", "which Helm driver type to use")
+	pflag.StringVar(&kubeConfig, "kubeConfig", "", "Absolute path of the kubeconfig file to be used ")
 	pflag.IntVar(&listLimit, "list-max", 256, "maximum number of releases to fetch")
 	pflag.StringVar(&userAgentComment, "user-agent-comment", "", "UserAgent comment used during outbound requests")
 	// Default timeout from https://github.com/helm/helm/blob/b0b0accdfc84e154b3d48ec334cd5b4f9b345667/cmd/helm/install.go#L216
@@ -44,7 +47,7 @@ func init() {
 func main() {
 	pflag.Parse()
 	settings.Init(pflag.CommandLine)
-
+	fmt.Print(settings)
 	kubeappsNamespace := os.Getenv("POD_NAMESPACE")
 	if kubeappsNamespace == "" {
 		log.Fatal("POD_NAMESPACE should be defined")

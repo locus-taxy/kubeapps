@@ -151,11 +151,12 @@ func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
 			},
 		},
 	)
+
 	config, err := clientConfig.ClientConfig()
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Print(config)
 	svcRestConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
