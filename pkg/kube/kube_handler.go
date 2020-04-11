@@ -137,7 +137,7 @@ type appRepositoryRequestDetails struct {
 // NewHandler returns an AppRepositories and Kubernetes handler configured with
 // the in-cluster config but overriding the token with an empty string, so that
 // configForToken must be called to obtain a valid config.
-func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
+func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		clientcmd.NewDefaultClientConfigLoadingRules(),
 		&clientcmd.ConfigOverrides{
@@ -149,12 +149,6 @@ func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
 				// A non empty value is required to override, it seems.
 				TokenFile: " ",
 			},
-			ClusterInfo: clientcmdapi.Cluster{
-				Server:                   "https://35.200.215.243:443",
-				InsecureSkipTLSVerify:    true,
-				CertificateAuthority:     " ",
-				CertificateAuthorityData: []byte{},
-			},
 		},
 	)
 	config, err := clientConfig.ClientConfig()
@@ -162,27 +156,29 @@ func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
 		return nil, err
 	}
 	fmt.Println("Handler")
-	g := clientConfig.ConfigAccess()
-	c,_,_ := clientConfig.Namespace()
-	d, _ := clientConfig.RawConfig()
-	fmt.Print(g,"\n")
-	fmt.Print(c,"\n")
-	fmt.Print(d,"\n")
 	fmt.Print(config,"\n")
 	fmt.Print("END\n")
 	svcRestConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("svcRestConfig")
+	fmt.Print(svcRestConfig,"\n")
+	fmt.Print("END\n")
 	svcKubeClient, err := kubernetes.NewForConfig(svcRestConfig)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("svcKubeClient")
+	fmt.Print(svcKubeClient,"\n")
+	fmt.Print("END\n")
 	svcAppRepoClient, err := apprepoclientset.NewForConfig(svcRestConfig)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("svcAppRepoClient")
+	fmt.Print(svcAppRepoClient,"\n")
+	fmt.Print("END\n")
 	return &kubeHandler{
 		config:            *config,
 		kubeappsNamespace: kubeappsNamespace,
