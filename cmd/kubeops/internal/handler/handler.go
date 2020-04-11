@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"strconv"
 
@@ -53,12 +54,13 @@ type Config struct {
 
 // NewInClusterConfig returns an internal cluster config replacing the token.
 func NewInClusterConfig(token string) (*rest.Config, error) {
-	config, err := rest.InClusterConfig()
+	config, err :=  clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 	if err != nil {
 		return nil, err
 	}
 	config.BearerToken = token
 	config.BearerTokenFile = ""
+	config.Insecure = true
 	return config, nil
 }
 
