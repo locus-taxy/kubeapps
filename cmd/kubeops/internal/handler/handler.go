@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"strconv"
@@ -60,7 +61,7 @@ func NewInClusterConfig(token string) (*rest.Config, error) {
 	}
 	config.BearerToken = token
 	config.BearerTokenFile = ""
-	config.Insecure = true
+	fmt.Print(config)
 	return config, nil
 }
 
@@ -93,7 +94,7 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 				response.NewErrorResponse(http.StatusInternalServerError, authUserError).Write(w)
 				return
 			}
-
+			fmt.Print(actionConfig)
 			kubeHandler, err := kube.NewHandler(options.KubeappsNamespace, "")
 			if err != nil {
 				log.Errorf("Failed to create handler: %v", err)
