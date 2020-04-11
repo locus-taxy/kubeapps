@@ -144,15 +144,13 @@ func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
 		&clientcmd.ConfigOverrides{
 			ClusterInfo: clientcmdapi.Cluster{
 				Server: "https://35.200.215.243",
+				InsecureSkipTLSVerify: true,
 			},
 		})
 	config, err := clientConfig.ClientConfig()
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Handler")
-	fmt.Print(config,"\n")
-	fmt.Print("END\n")
 	svcRestConfig, err := clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 	if err != nil {
 		return nil, err
