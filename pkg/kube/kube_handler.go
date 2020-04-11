@@ -142,14 +142,6 @@ func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		&clientcmd.ClientConfigLoadingRules{},
 		&clientcmd.ConfigOverrides{
-			AuthInfo: clientcmdapi.AuthInfo{
-				// These three override their respective file or string
-				// data.
-				ClientCertificateData: []byte{},
-				ClientKeyData:         []byte{},
-				// A non empty value is required to override, it seems.
-				TokenFile: " ",
-			},
 			ClusterInfo: clientcmdapi.Cluster{
 				Server: "https://35.200.215.243",
 			},
