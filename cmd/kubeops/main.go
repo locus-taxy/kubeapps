@@ -55,10 +55,11 @@ func main() {
 	options := handler.Options{
 		ListLimit:         listLimit,
 		Timeout:           timeout,
-		KubeappsNamespace: kubeappsNamespace,
+		KubeappsNamespace: "cool",
 	}
 
 	storageForDriver := agent.StorageForSecrets
+
 	if helmDriverArg != "" {
 		var err error
 		storageForDriver, err = agent.ParseDriverType(helmDriverArg)
@@ -66,7 +67,10 @@ func main() {
 			panic(err)
 		}
 	}
+	fmt.Println("storage")
+	fmt.Print(&storageForDriver)
 	fmt.Print(storageForDriver)
+	fmt.Println("storage")
 	withHandlerConfig := handler.WithHandlerConfig(storageForDriver, options)
 	r := mux.NewRouter()
 

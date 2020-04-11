@@ -48,6 +48,9 @@ func StorageForMemory(_ string, _ *kubernetes.Clientset) *storage.Storage {
 func ListReleases(actionConfig *action.Configuration, namespace string, listLimit int, status string) ([]proxy.AppOverview, error) {
 	allNamespaces := namespace == ""
 	cmd := action.NewList(actionConfig)
+	fmt.Println("CMD")
+	fmt.Print(cmd)
+	fmt.Println("CMD")
 	if allNamespaces {
 		cmd.AllNamespaces = true
 	}
@@ -59,6 +62,9 @@ func ListReleases(actionConfig *action.Configuration, namespace string, listLimi
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("releases")
+	fmt.Print(releases)
+	fmt.Println("releases")
 	appOverviews := make([]proxy.AppOverview, 0)
 	for _, r := range releases {
 		if allNamespaces || r.Namespace == namespace {
