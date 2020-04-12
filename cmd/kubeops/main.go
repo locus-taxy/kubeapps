@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -67,10 +66,6 @@ func main() {
 			panic(err)
 		}
 	}
-	fmt.Println("storage")
-	fmt.Print(&storageForDriver)
-	fmt.Print(storageForDriver)
-	fmt.Println("storage")
 	withHandlerConfig := handler.WithHandlerConfig(storageForDriver, options)
 	r := mux.NewRouter()
 

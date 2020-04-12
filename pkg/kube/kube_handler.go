@@ -144,10 +144,13 @@ func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
 		&clientcmd.ConfigOverrides{
 			ClusterInfo: clientcmdapi.Cluster{
 				Server: "https://35.200.215.243",
-				InsecureSkipTLSVerify: true,
+				CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
 			},
 		})
+
 	config, err := clientConfig.ClientConfig()
+	fmt.Print(config)
+	config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 	if err != nil {
 		return nil, err
 	}

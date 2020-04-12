@@ -61,6 +61,7 @@ func NewInClusterConfig(token string) (*rest.Config, error) {
 	}
 	config.BearerToken = token
 	config.BearerTokenFile = ""
+	config.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 	fmt.Print(config)
 	return config, nil
 }
@@ -76,7 +77,6 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 
 			// User configuration and clients, using user token
 			// Used to perform Helm operations
-			fmt.Println(token)
 			restConfig, err := NewInClusterConfig(token)
 			if err != nil {
 				log.Errorf("Failed to create in-cluster config with user token: %v", err)
