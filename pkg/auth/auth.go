@@ -18,6 +18,7 @@ package auth
 
 import (
 	"fmt"
+	"k8s.io/client-go/tools/clientcmd"
 	"regexp"
 	"strings"
 
@@ -28,7 +29,6 @@ import (
 	discovery "k8s.io/client-go/discovery"
 	"k8s.io/client-go/kubernetes"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
-	"k8s.io/client-go/rest"
 )
 
 type resource struct {
@@ -100,13 +100,13 @@ type Checker interface {
 
 // NewAuth creates an auth agent
 func NewAuth(token string) (*UserAuth, error) {
-	config, err := rest.InClusterConfig()
+	config, err :=  clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 	if err != nil {
 		return nil, err
 	}
-	// Overwrite default token
 	config.BearerToken = token
-	config.BearerTokenFile = "" // https://github.com/kubeapps/kubeapps/pull/1359#issuecomment-564077326
+	config.BearerTokenFile = ""
+	config.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 	kubeClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
