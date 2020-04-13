@@ -112,6 +112,7 @@ func NewAuth(token string) (*UserAuth, error) {
 		return nil, err
 	}
 	authCli := kubeClient.AuthorizationV1()
+	fmt.Print(authCli)
 	discoveryCli := kubeClient.Discovery()
 	k8sAuthCli := k8sAuth{
 		AuthCli:      authCli,

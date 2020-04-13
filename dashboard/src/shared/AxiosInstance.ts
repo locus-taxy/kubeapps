@@ -18,6 +18,7 @@ export function addAuthHeaders(axiosInstance: AxiosInstance) {
   axiosInstance.interceptors.request.use((config: AxiosRequestConfig) => {
     const authToken = Auth.getAuthToken();
     if (authToken) {
+
       config.headers.Authorization = `Bearer ${authToken}`;
     }
     return config;

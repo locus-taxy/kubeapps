@@ -7,9 +7,7 @@
     "ordered-imports": [false],
     "object-literal-sort-keys": [false],
     "quotemark": [true, "avoid-template", "avoid-escape"],
-    "no-console": {
-      "severity": "warning"
-    }
+    "no-console": false
   },
   "rulesDirectory": []
 }

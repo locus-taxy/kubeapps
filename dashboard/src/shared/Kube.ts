@@ -33,6 +33,7 @@ export class Kube {
     if (query) {
       url += `?${query}`;
     }
+    console.log(url)
     return url;
   }
 
