@@ -74,6 +74,7 @@ func ParseAndGetChart(req *http.Request, cu chartUtils.Resolver, requireV1Suppor
 	if err != nil {
 		return nil, nil, err
 	}
+
 	chartDetails, err := cu.ParseDetails(body)
 	if err != nil {
 		return nil, nil, err

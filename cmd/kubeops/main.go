@@ -55,7 +55,7 @@ func main() {
 	options := handler.Options{
 		ListLimit:         listLimit,
 		Timeout:           timeout,
-		KubeappsNamespace: "cool",
+		KubeappsNamespace: kubeappsNamespace,
 	}
 
 	storageForDriver := agent.StorageForSecrets

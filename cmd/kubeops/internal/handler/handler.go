@@ -55,6 +55,17 @@ type Config struct {
 
 // NewInClusterConfig returns an internal cluster config replacing the token.
 func NewInClusterConfig(token string) (*rest.Config, error) {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	config.BearerToken = "token"
+	config.BearerTokenFile = ""
+	return config, nil
+}
+
+// NewBuildConfigFromFlags returns an external cluster config replacing the token.
+func NewBuildConfigFromFlags(token string) (*rest.Config, error) {
 	config, err :=  clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 	if err != nil {
 		return nil, err
@@ -77,7 +88,7 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 
 			// User configuration and clients, using user token
 			// Used to perform Helm operations
-			restConfig, err := NewInClusterConfig(token)
+			restConfig, err := NewBuildConfigFromFlags(token)
 			if err != nil {
 				log.Errorf("Failed to create in-cluster config with user token: %v", err)
 				response.NewErrorResponse(http.StatusInternalServerError, authUserError).Write(w)
@@ -95,7 +106,6 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 				response.NewErrorResponse(http.StatusInternalServerError, authUserError).Write(w)
 				return
 			}
-			fmt.Print(actionConfig)
 			kubeHandler, err := kube.NewHandler(options.KubeappsNamespace, "")
 			if err != nil {
 				log.Errorf("Failed to create handler: %v", err)
