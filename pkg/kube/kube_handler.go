@@ -189,20 +189,23 @@ type Tess struct {
 	Server string
 }
 func NewHandler(s Tess) (AuthHandler, error) {
-	fmt.Print(s.Server)
 	config,svcRestConfig, err := test(s.Server)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("1")
 	svcKubeClient, err := kubernetes.NewForConfig(svcRestConfig)
+	fmt.Println("2")
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("3")
 	svcAppRepoClient, err := apprepoclientset.NewForConfig(svcRestConfig)
+	fmt.Println("4")
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("5")
 	return &kubeHandler{
 		config:            *config,
 		kubeappsNamespace: s.Names,
