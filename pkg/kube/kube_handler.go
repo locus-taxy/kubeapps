@@ -186,7 +186,7 @@ func test(st string)(config,svcRestConfig *rest.Config, err error){
 // configForToken must be called to obtain a valid config.
 func NewHandler(kubeappsNamespace, serverType string) (AuthHandler, error) {
 
-	config,svcRestConfig, err := test(serverType)
+	config,svcRestConfig, err := test("dasda")
 	if err != nil {
 		return nil, err
 	}
