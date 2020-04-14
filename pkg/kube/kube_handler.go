@@ -184,9 +184,13 @@ func test(server string)(config,svcRestConfig *rest.Config, err error){
 // NewHandler returns an AppRepositories and Kubernetes handler configured with
 // the in-cluster config but overriding the token with an empty string, so that
 // configForToken must be called to obtain a valid config.
-func NewHandler(server string, kubeappsNamespace string) (AuthHandler, error) {
-	fmt.Print(server)
-	config,svcRestConfig, err := test("vvdv")
+type Tess struct {
+	names string
+	server string
+}
+func NewHandler(s Tess) (AuthHandler, error) {
+	fmt.Print(s.server)
+	config,svcRestConfig, err := test(s.server)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +205,7 @@ func NewHandler(server string, kubeappsNamespace string) (AuthHandler, error) {
 
 	return &kubeHandler{
 		config:            *config,
-		kubeappsNamespace: kubeappsNamespace,
+		kubeappsNamespace: s.names,
 		// See comment in the struct defn above.
 		clientsetForConfig: clientsetForConfig,
 		svcClientset:       &combinedClientset{svcAppRepoClient, svcKubeClient},
