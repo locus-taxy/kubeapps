@@ -184,9 +184,9 @@ func test(server string)(config,svcRestConfig *rest.Config, err error){
 // NewHandler returns an AppRepositories and Kubernetes handler configured with
 // the in-cluster config but overriding the token with an empty string, so that
 // configForToken must be called to obtain a valid config.
-func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
+func NewHandler(server string, kubeappsNamespace string) (AuthHandler, error) {
 
-	config,svcRestConfig, err := test("default")
+	config,svcRestConfig, err := test(server)
 	if err != nil {
 		return nil, err
 	}
