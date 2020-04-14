@@ -137,7 +137,6 @@ type appRepositoryRequestDetails struct {
 
 func test(server string)(*rest.Config, *rest.Config,error){
 	if server == "default" {
-		fmt.Println("1")
 		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 			clientcmd.NewDefaultClientConfigLoadingRules(),
 			&clientcmd.ConfigOverrides{
@@ -151,19 +150,16 @@ func test(server string)(*rest.Config, *rest.Config,error){
 				},
 			},
 		)
-		fmt.Println("2")
 		config, err := clientConfig.ClientConfig()
 		if err != nil {
 			return nil, nil,err
 		}
-		fmt.Println("3")
 		svcRestConfig, err := rest.InClusterConfig()
 		if err != nil {
 			return nil,nil, err
 		}
 		return config,svcRestConfig, nil
 	} else {
-		fmt.Println("4")
 		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 			&clientcmd.ClientConfigLoadingRules{},
 			&clientcmd.ConfigOverrides{
@@ -172,13 +168,11 @@ func test(server string)(*rest.Config, *rest.Config,error){
 					CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
 				},
 			})
-		fmt.Println("5")
 		config, err := clientConfig.ClientConfig()
 		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 		if err != nil {
 			return nil,nil, err
 		}
-		fmt.Println("6")
 		svcRestConfig, err := clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 		if err != nil {
 			return nil,nil, err

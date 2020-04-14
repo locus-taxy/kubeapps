@@ -110,11 +110,15 @@ func GetNamespaces(kubeHandler kube.AuthHandler) func(w http.ResponseWriter, req
 
 // SetupDefaultRoutes enables call-sites to use the backend api's default routes with minimal setup.
 func SetupDefaultRoutes(r *mux.Router) error {
-	backendHandler, err := kube.NewHandler(kube.Tess{Names:os.Getenv("POD_NAMESPACE"),Server:"jdshm"})
+	backendHandlerNamespace, err := kube.NewHandler(kube.Tess{Names:os.Getenv("POD_NAMESPACE"),Server:"jdshm"})
 	if err != nil {
 		return err
 	}
-	r.Methods("GET").Path("/namespaces").Handler(http.HandlerFunc(GetNamespaces(backendHandler)))
+	backendHandler, err := kube.NewHandler(kube.Tess{Names:os.Getenv("POD_NAMESPACE"),Server:"default"})
+	if err != nil {
+		return err
+	}
+	r.Methods("GET").Path("/namespaces").Handler(http.HandlerFunc(GetNamespaces(backendHandlerNamespace)))
 	r.Methods("POST").Path("/namespaces/{namespace}/apprepositories").Handler(http.HandlerFunc(CreateAppRepository(backendHandler)))
 	r.Methods("DELETE").Path("/namespaces/{namespace}/apprepositories/{name}").Handler(http.HandlerFunc(DeleteAppRepository(backendHandler)))
 	return nil
