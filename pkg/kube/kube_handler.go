@@ -185,12 +185,12 @@ func test(server string)(config,svcRestConfig *rest.Config, err error){
 // the in-cluster config but overriding the token with an empty string, so that
 // configForToken must be called to obtain a valid config.
 type Tess struct {
-	names string
-	server string
+	Names string
+	Server string
 }
 func NewHandler(s Tess) (AuthHandler, error) {
-	fmt.Print(s.server)
-	config,svcRestConfig, err := test(s.server)
+	fmt.Print(s.Server)
+	config,svcRestConfig, err := test(s.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func NewHandler(s Tess) (AuthHandler, error) {
 
 	return &kubeHandler{
 		config:            *config,
-		kubeappsNamespace: s.names,
+		kubeappsNamespace: s.Names,
 		// See comment in the struct defn above.
 		clientsetForConfig: clientsetForConfig,
 		svcClientset:       &combinedClientset{svcAppRepoClient, svcKubeClient},

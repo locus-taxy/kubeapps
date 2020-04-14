@@ -18,9 +18,6 @@ package httphandler
 
 import (
 	"encoding/json"
-	"net/http"
-	"os"
-
 	"github.com/gorilla/mux"
 	"github.com/kubeapps/kubeapps/cmd/apprepository-controller/pkg/apis/apprepository/v1alpha1"
 	"github.com/kubeapps/kubeapps/pkg/auth"
@@ -28,6 +25,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+	"net/http"
+	"os"
 )
 
 // namespacesResponse is used to marshal the JSON response
@@ -111,7 +110,7 @@ func GetNamespaces(kubeHandler kube.AuthHandler) func(w http.ResponseWriter, req
 
 // SetupDefaultRoutes enables call-sites to use the backend api's default routes with minimal setup.
 func SetupDefaultRoutes(r *mux.Router) error {
-	backendHandler, err := kube.NewHandler(kube.Tess{os.Getenv("POD_NAMESPACE"),"hhhh"})
+	backendHandler, err := kube.NewHandler(kube.Tess{Names:os.Getenv("POD_NAMESPACE"),Server:"jdshm"})
 	if err != nil {
 		return err
 	}

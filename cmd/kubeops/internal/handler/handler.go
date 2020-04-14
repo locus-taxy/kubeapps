@@ -106,7 +106,7 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 				response.NewErrorResponse(http.StatusInternalServerError, authUserError).Write(w)
 				return
 			}
-			kubeHandler, err := kube.NewHandler(kube.Tess{options.KubeappsNamespace,"default"})
+			kubeHandler, err := kube.NewHandler(kube.Tess{Names:options.KubeappsNamespace, Server:"default"})
 			if err != nil {
 				log.Errorf("Failed to create handler: %v", err)
 				response.NewErrorResponse(http.StatusInternalServerError, authUserError).Write(w)
