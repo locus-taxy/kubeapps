@@ -111,8 +111,7 @@ func GetNamespaces(kubeHandler kube.AuthHandler) func(w http.ResponseWriter, req
 
 // SetupDefaultRoutes enables call-sites to use the backend api's default routes with minimal setup.
 func SetupDefaultRoutes(r *mux.Router) error {
-	server := "cool"
-	backendHandler, err := kube.NewHandler(os.Getenv("POD_NAMESPACE"),server)
+	backendHandler, err := kube.NewHandler(os.Getenv("POD_NAMESPACE"),"cool")
 	if err != nil {
 		return err
 	}

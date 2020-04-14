@@ -135,8 +135,8 @@ type appRepositoryRequestDetails struct {
 }
 
 
-func test(server string)(config,svcRestConfig *rest.Config, err error){
-	if server == "" {
+func test(st string)(config,svcRestConfig *rest.Config, err error){
+	if st == "default" {
 		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 			clientcmd.NewDefaultClientConfigLoadingRules(),
 			&clientcmd.ConfigOverrides{
@@ -184,9 +184,9 @@ func test(server string)(config,svcRestConfig *rest.Config, err error){
 // NewHandler returns an AppRepositories and Kubernetes handler configured with
 // the in-cluster config but overriding the token with an empty string, so that
 // configForToken must be called to obtain a valid config.
-func NewHandler(kubeappsNamespace, server string) (AuthHandler, error) {
+func NewHandler(kubeappsNamespace, serverType string) (AuthHandler, error) {
 
-	config,svcRestConfig, err := test(server)
+	config,svcRestConfig, err := test(serverType)
 	if err != nil {
 		return nil, err
 	}
