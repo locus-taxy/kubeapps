@@ -134,57 +134,26 @@ type appRepositoryRequestDetails struct {
 	ResyncRequests     uint                   `json:"resyncRequests"`
 }
 
-func test(server string )(config, svcRestConfig *rest.Config, err error){
-	if server == "" {
-		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			clientcmd.NewDefaultClientConfigLoadingRules(),
-			&clientcmd.ConfigOverrides{
-				AuthInfo: clientcmdapi.AuthInfo{
-					// These three override their respective file or string
-					// data.
-					ClientCertificateData: []byte{},
-					ClientKeyData:         []byte{},
-					// A non empty value is required to override, it seems.
-					TokenFile: " ",
-				},
-			},
-		)
-		config, err = clientConfig.ClientConfig()
-		if err != nil {
-			return nil, nil, err
-		}
-
-		svcRestConfig, err = rest.InClusterConfig()
-		if err != nil {
-			return nil, nil, err
-		}
-	} else {
-		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{},
-			&clientcmd.ConfigOverrides{
-				ClusterInfo: clientcmdapi.Cluster{
-					Server: "https://35.200.215.243",
-					CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
-				},
-			})
-
-		config, err := clientConfig.ClientConfig()
-		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
-		if err != nil {
-			return nil, nil, err
-		}
-		svcRestConfig, err = clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-	return
-}
 // NewHandler returns an AppRepositories and Kubernetes handler configured with
 // the in-cluster config but overriding the token with an empty string, so that
 // configForToken must be called to obtain a valid config.
 func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
-	config, svcRestConfig, err := test(server)
+
+	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{},
+		&clientcmd.ConfigOverrides{
+			ClusterInfo: clientcmdapi.Cluster{
+				Server: "https://35.200.215.243",
+				CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
+			},
+		})
+
+	config, err := clientConfig.ClientConfig()
+	config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
+	if err != nil {
+		return nil, err
+	}
+	svcRestConfig, err := clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 	if err != nil {
 		return nil, err
 	}
