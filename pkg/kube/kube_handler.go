@@ -134,13 +134,8 @@ type appRepositoryRequestDetails struct {
 	ResyncRequests     uint                   `json:"resyncRequests"`
 }
 
-// NewHandler returns an AppRepositories and Kubernetes handler configured with
-// the in-cluster config but overriding the token with an empty string, so that
-// configForToken must be called to obtain a valid config.
-func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
-	var svcRestConfig , config *rest.Config
+func test(server string )(config, svcRestConfig *rest.Config, err error){
 	if server == "" {
-		var err error
 		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 			clientcmd.NewDefaultClientConfigLoadingRules(),
 			&clientcmd.ConfigOverrides{
@@ -156,12 +151,12 @@ func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
 		)
 		config, err = clientConfig.ClientConfig()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		svcRestConfig, err = rest.InClusterConfig()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	} else {
 		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -176,12 +171,22 @@ func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
 		config, err := clientConfig.ClientConfig()
 		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		svcRestConfig, err = clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
+	}
+	return
+}
+// NewHandler returns an AppRepositories and Kubernetes handler configured with
+// the in-cluster config but overriding the token with an empty string, so that
+// configForToken must be called to obtain a valid config.
+func NewHandler(kubeappsNamespace string, server string) (AuthHandler, error) {
+	config, svcRestConfig, err := test(server)
+	if err != nil {
+		return nil, err
 	}
 	svcKubeClient, err := kubernetes.NewForConfig(svcRestConfig)
 	if err != nil {
