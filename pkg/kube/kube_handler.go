@@ -185,8 +185,8 @@ func test(server string)(config,svcRestConfig *rest.Config, err error){
 // the in-cluster config but overriding the token with an empty string, so that
 // configForToken must be called to obtain a valid config.
 func NewHandler(server string, kubeappsNamespace string) (AuthHandler, error) {
-
-	config,svcRestConfig, err := test(server)
+	fmt.Print(server)
+	config,svcRestConfig, err := test("vvdv")
 	if err != nil {
 		return nil, err
 	}
