@@ -135,8 +135,9 @@ type appRepositoryRequestDetails struct {
 }
 
 
-func test(server string)(config,svcRestConfig *rest.Config, err error){
+func test(server string)(*rest.Config, *rest.Config,error){
 	if server == "default" {
+		fmt.Println("1")
 		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 			clientcmd.NewDefaultClientConfigLoadingRules(),
 			&clientcmd.ConfigOverrides{
@@ -150,16 +151,19 @@ func test(server string)(config,svcRestConfig *rest.Config, err error){
 				},
 			},
 		)
-		config, err = clientConfig.ClientConfig()
+		fmt.Println("2")
+		config, err := clientConfig.ClientConfig()
 		if err != nil {
 			return nil, nil,err
 		}
-
-		svcRestConfig, err = rest.InClusterConfig()
+		fmt.Println("3")
+		svcRestConfig, err := rest.InClusterConfig()
 		if err != nil {
 			return nil,nil, err
 		}
+		return config,svcRestConfig, nil
 	} else {
+		fmt.Println("4")
 		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 			&clientcmd.ClientConfigLoadingRules{},
 			&clientcmd.ConfigOverrides{
@@ -168,18 +172,19 @@ func test(server string)(config,svcRestConfig *rest.Config, err error){
 					CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
 				},
 			})
-
+		fmt.Println("5")
 		config, err := clientConfig.ClientConfig()
 		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 		if err != nil {
 			return nil,nil, err
 		}
-		svcRestConfig, err = clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
+		fmt.Println("6")
+		svcRestConfig, err := clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 		if err != nil {
 			return nil,nil, err
 		}
+		return config,svcRestConfig, nil
 	}
-	return
 }
 // NewHandler returns an AppRepositories and Kubernetes handler configured with
 // the in-cluster config but overriding the token with an empty string, so that
@@ -193,19 +198,17 @@ func NewHandler(s Tess) (AuthHandler, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("1")
 	svcKubeClient, err := kubernetes.NewForConfig(svcRestConfig)
-	fmt.Println("2")
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("3")
 	svcAppRepoClient, err := apprepoclientset.NewForConfig(svcRestConfig)
-	fmt.Println("4")
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("5")
+	fmt.Println("cool")
+	fmt.Print(*config)
+	fmt.Print(*svcRestConfig)
 	return &kubeHandler{
 		config:            *config,
 		kubeappsNamespace: s.Names,
