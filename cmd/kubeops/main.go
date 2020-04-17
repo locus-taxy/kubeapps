@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -80,7 +79,6 @@ func main() {
 	// Auth not necessary here with Helm 3 because it's done by Kubernetes.
 	addRoute := handler.AddRouteWith(r.PathPrefix("/v1").Subrouter(), withHandlerConfig)
 	addRoute("GET", "/releases", handler.ListAllReleases)
-	addRoute("GET", "/namespaces/{namespace}/releases", handler.ListReleases)
 	addRoute("POST", "/namespaces/{namespace}/releases", handler.CreateRelease)
 	addRoute("GET", "/namespaces/{namespace}/releases/{releaseName}", handler.GetRelease)
 	addRoute("PUT", "/namespaces/{namespace}/releases/{releaseName}", handler.OperateRelease)
@@ -105,8 +103,6 @@ func main() {
 	assetsvcRouter.Methods("GET").Path("/v1/assets/{repo}/{id}/logo").Handler(negroni.New(
 		negroni.Wrap(http.StripPrefix(assetsvcPrefix, assetsvcProxy)),
 	))
-	fmt.Print(assetsvcPrefix)
-	fmt.Print(assetsvcProxy)
 	assetsvcRouter.Methods("GET").Handler(negroni.New(
 		authGate,
 		negroni.Wrap(http.StripPrefix(assetsvcPrefix, assetsvcProxy)),

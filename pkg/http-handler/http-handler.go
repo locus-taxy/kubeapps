@@ -50,6 +50,13 @@ func returnK8sError(err error, w http.ResponseWriter) {
 	}
 }
 
+// GetAppRepository creates App Repository
+func GetAppRepository(handler kube.AuthHandler) func(w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+
+	}
+}
+
 // CreateAppRepository creates App Repository
 func CreateAppRepository(handler kube.AuthHandler) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -119,6 +126,7 @@ func SetupDefaultRoutes(r *mux.Router) error {
 		return err
 	}
 	r.Methods("GET").Path("/namespaces").Handler(http.HandlerFunc(GetNamespaces(backendHandlerNamespace)))
+	r.Methods("GET").Path("/namespaces/{namespace}/apprepositories").Handler(http.HandlerFunc(CreateAppRepository(backendHandler)))
 	r.Methods("POST").Path("/namespaces/{namespace}/apprepositories").Handler(http.HandlerFunc(CreateAppRepository(backendHandler)))
 	r.Methods("DELETE").Path("/namespaces/{namespace}/apprepositories/{name}").Handler(http.HandlerFunc(DeleteAppRepository(backendHandler)))
 	return nil
