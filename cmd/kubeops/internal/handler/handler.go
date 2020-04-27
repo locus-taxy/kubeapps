@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"strconv"
 
@@ -51,15 +52,23 @@ type Config struct {
 	ChartClient  chartUtils.Resolver
 }
 
-// NewInClusterConfig returns an internal cluster config replacing the token.
-func NewInClusterConfig(token string) (*rest.Config, error) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, err
+// NewClusterConfig returns an internal cluster config replacing the token.
+func NewClusterConfig(token string, stack string) (config *rest.Config,err error) {
+	if stack == "default" {
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			return
+		}
+	} else {
+		config, err =  clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
+		if err != nil {
+			return
+		}
+		config.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 	}
 	config.BearerToken = token
 	config.BearerTokenFile = ""
-	return config, nil
+	return
 }
 
 // WithHandlerConfig takes a dependentHandler and creates a regular (WithParams) handler that,
@@ -73,7 +82,7 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 
 			// User configuration and clients, using user token
 			// Used to perform Helm operations
-			restConfig, err := NewInClusterConfig(token)
+			restConfig, err := NewClusterConfig(token, "test")
 			if err != nil {
 				log.Errorf("Failed to create in-cluster config with user token: %v", err)
 				response.NewErrorResponse(http.StatusInternalServerError, authUserError).Write(w)
