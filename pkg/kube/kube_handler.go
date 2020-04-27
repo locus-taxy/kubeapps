@@ -170,6 +170,7 @@ func test(server string)(*rest.Config, *rest.Config,error){
 			})
 		config, err := clientConfig.ClientConfig()
 		fmt.Print(config)
+		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 		if err != nil {
 			return nil,nil, err
 		}
