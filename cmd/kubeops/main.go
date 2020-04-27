@@ -14,7 +14,6 @@ import (
 	"github.com/heptiolabs/healthcheck"
 	"github.com/kubeapps/kubeapps/cmd/kubeops/internal/handler"
 	"github.com/kubeapps/kubeapps/pkg/agent"
-	"github.com/kubeapps/kubeapps/pkg/auth"
 	backendHandlers "github.com/kubeapps/kubeapps/pkg/http-handler"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
@@ -90,7 +89,7 @@ func main() {
 	}
 
 	// assetsvc reverse proxy
-	authGate := auth.AuthGate()
+	//authGate := auth.AuthGate()
 	parsedAssetsvcURL, err := url.Parse(assetsvcURL)
 	if err != nil {
 		log.Fatalf("Unable to parse the assetsvc URL: %v", err)
@@ -103,7 +102,6 @@ func main() {
 		negroni.Wrap(http.StripPrefix(assetsvcPrefix, assetsvcProxy)),
 	))
 	assetsvcRouter.Methods("GET").Handler(negroni.New(
-		authGate,
 		negroni.Wrap(http.StripPrefix(assetsvcPrefix, assetsvcProxy)),
 	))
 
