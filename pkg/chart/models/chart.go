@@ -68,6 +68,7 @@ type ChartVersion struct {
 	AppVersion  string    `json:"app_version"`
 	Created     time.Time `json:"created"`
 	Description string    `json:"description"`
+
 	Digest      string    `json:"digest"`
 	URLs        []string  `json:"urls"`
 	Readme      string    `json:"readme" bson:"-"`
