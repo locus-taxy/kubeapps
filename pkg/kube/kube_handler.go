@@ -152,6 +152,7 @@ func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
 		},
 	)
 	config, err := clientConfig.ClientConfig()
+	fmt.Println(config)
 	if err != nil {
 		return nil, err
 	}
