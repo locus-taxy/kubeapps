@@ -137,22 +137,45 @@ type appRepositoryRequestDetails struct {
 // NewHandler returns an AppRepositories and Kubernetes handler configured with
 // the in-cluster config but overriding the token with an empty string, so that
 // configForToken must be called to obtain a valid config.
-func NewHandler(kubeappsNamespace string) (AuthHandler, error) {
-	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		clientcmd.NewDefaultClientConfigLoadingRules(),
-		&clientcmd.ConfigOverrides{
-			AuthInfo: clientcmdapi.AuthInfo{
-				// These three override their respective file or string
-				// data.
-				ClientCertificateData: []byte{},
-				ClientKeyData:         []byte{},
-				// A non empty value is required to override, it seems.
-				TokenFile: " ",
+func newHandlerStack(stack string) (*rest.Config, error){
+	if stack == "default" {
+		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			clientcmd.NewDefaultClientConfigLoadingRules(),
+			&clientcmd.ConfigOverrides{
+				AuthInfo: clientcmdapi.AuthInfo{
+					// These three override their respective file or string
+					// data.
+					ClientCertificateData: []byte{},
+					ClientKeyData:         []byte{},
+					// A non empty value is required to override, it seems.
+					TokenFile: " ",
+				},
 			},
-		},
-	)
+		)
+		config, err := clientConfig.ClientConfig()
+		if err != nil {
+			return nil, err
+		}
+		return config, nil
+	}
+	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{},
+		&clientcmd.ConfigOverrides{
+			ClusterInfo: clientcmdapi.Cluster{
+				Server: "https://35.200.215.243",
+				CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
+			},
+		})
 	config, err := clientConfig.ClientConfig()
-	fmt.Println(config)
+	if err != nil {
+		return nil, err
+	}
+	config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
+	return config, nil
+}
+func NewHandler(kubeappsNamespace string, stack string) (AuthHandler, error) {
+	config, err := newHandlerStack(stack)
+
 	if err != nil {
 		return nil, err
 	}
