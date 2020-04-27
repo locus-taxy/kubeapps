@@ -154,6 +154,8 @@ func test(server string)(*rest.Config, *rest.Config,error){
 		if err != nil {
 			return nil, nil,err
 		}
+		fmt.Println("default")
+		fmt.Print(config)
 		svcRestConfig, err := rest.InClusterConfig()
 		if err != nil {
 			return nil,nil, err
@@ -169,11 +171,12 @@ func test(server string)(*rest.Config, *rest.Config,error){
 				},
 			})
 		config, err := clientConfig.ClientConfig()
-		fmt.Print(config)
-		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 		if err != nil {
 			return nil,nil, err
 		}
+		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
+		fmt.Println("default")
+		fmt.Print(config)
 		svcRestConfig, err := clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
 		if err != nil {
 			return nil,nil, err
