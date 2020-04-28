@@ -136,9 +136,7 @@ func main() {
 
 	//kubernetes API reverse proxy
 
-	kubernetesAPIPrefix := "/kube"
-	kubernetesRouter := r.PathPrefix(kubernetesAPIPrefix).Subrouter()
-	kubernetesRouter.HandleFunc("/kube", kubeProxyHandler)
+	r.HandleFunc("/kube", kubeProxyHandler)
 	//parsedKubeAPIURL, err := url.Parse("https://35.200.215.243")
 	//if err != nil {
 	//	log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
