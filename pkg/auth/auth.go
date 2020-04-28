@@ -102,7 +102,7 @@ type Checker interface {
 
 // NewAuth creates an auth agent
 func NewAuth(token string, stack string) (*UserAuth, error) {
-	var config *rest.Config
+	var config *rest.Config = nil
 	if stack == "default" {
 		var err error
 		config, err = rest.InClusterConfig()
