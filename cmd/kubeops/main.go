@@ -32,6 +32,7 @@ var (
 	userAgentComment string
 	listLimit        int
 	timeout          int64
+	kubernetesAPIURL string
 )
 
 func init() {
@@ -42,6 +43,28 @@ func init() {
 	pflag.StringVar(&userAgentComment, "user-agent-comment", "", "UserAgent comment used during outbound requests")
 	// Default timeout from https://github.com/helm/helm/blob/b0b0accdfc84e154b3d48ec334cd5b4f9b345667/cmd/helm/install.go#L216
 	pflag.Int64Var(&timeout, "timeout", 300, "Timeout to perform release operations (install, upgrade, rollback, delete)")
+}
+
+func kubeProxyHandler(w http.ResponseWriter, r *http.Request){
+	parsedKubeAPIURL, err := url.Parse("https://35.200.215.243")
+	if err != nil {
+		log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
+	}
+	kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
+
+	caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
+	if err != nil {
+		log.Fatal("Unable to get the CA cert: %v", err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	kubernetesProxy.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			RootCAs: caCertPool,
+		},
+	}
+	kubernetesProxy.ServeHTTP(w, r)
 }
 
 func main() {
@@ -112,31 +135,34 @@ func main() {
 	))
 
 	//kubernetes API reverse proxy
-	parsedKubeAPIURL, err := url.Parse("https://35.200.215.243")
-	if err != nil {
-		log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
-	}
-	kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
-
-	caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
-	if err != nil {
-		log.Fatal("Unable to get the CA cert: %v", err)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	kubernetesProxy.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			RootCAs:      caCertPool,
-		},
-	}
 
 	kubernetesAPIPrefix := "/kube"
 	kubernetesRouter := r.PathPrefix(kubernetesAPIPrefix).Subrouter()
-	// Logos don't require authentication so bypass that step
-	kubernetesRouter.Methods("GET").Handler(negroni.New(
-		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, kubernetesProxy)),
-	))
+	kubernetesRouter.HandleFunc("/kube", kubeProxyHandler)
+	//parsedKubeAPIURL, err := url.Parse("https://35.200.215.243")
+	//if err != nil {
+	//	log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
+	//}
+	//kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
+	//
+	//caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
+	//if err != nil {
+	//	log.Fatal("Unable to get the CA cert: %v", err)
+	//}
+	//caCertPool := x509.NewCertPool()
+	//caCertPool.AppendCertsFromPEM(caCert)
+	//
+	//kubernetesProxy.Transport = &http.Transport{
+	//	TLSClientConfig: &tls.Config{
+	//		RootCAs:      caCertPool,
+	//	},
+	//}
+	//
+
+	//// Logos don't require authentication so bypass that step
+	//kubernetesRouter.Methods("GET").Handler(negroni.New(
+	//	negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, kubernetesProxy)),
+	//))
 
 	n := negroni.Classic()
 	n.UseHandler(r)
