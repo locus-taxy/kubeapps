@@ -124,11 +124,9 @@ class LoginForm extends React.Component<ILoginFormProps, ILoginFormState> {
                 value={this.state.token}
               />
               <label htmlFor="stack">Kubernetes API Token</label>
-              <select id="stack" value={this.state.stack} onChange={this.handleStackChange}>
-                <option value="gcp">GCP</option>
-                <option selected={true} value="lazada">
-                  Lazada
-                </option>
+              <select id="stack" value={this.state.stack} onChange={this.handleStackChange} required={true}>
+                <option selected={true} value="default">GCP</option>
+                <option value="lazada">Lazada</option>
               </select>
             </div>
             <p>
