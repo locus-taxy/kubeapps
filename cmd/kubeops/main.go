@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -115,10 +117,20 @@ func main() {
 		log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
 	}
 	kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
-	//Skip cert verify
-	kubernetesProxy.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+
+	caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
+	if err != nil {
+		log.Fatal("Unable to get the CA cert: %v", err)
 	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	kubernetesProxy.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			RootCAs:      caCertPool,
+		},
+	}
+
 	kubernetesAPIPrefix := "/kube"
 	kubernetesRouter := r.PathPrefix(kubernetesAPIPrefix).Subrouter()
 	// Logos don't require authentication so bypass that step
