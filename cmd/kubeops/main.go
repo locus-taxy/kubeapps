@@ -115,7 +115,7 @@ func main() {
 	}
 	kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
 	kubernetesAPIPrefix := "/kube"
-	kubernetesRouter := r.PathPrefix(assetsvcPrefix).Subrouter()
+	kubernetesRouter := r.PathPrefix(kubernetesAPIPrefix).Subrouter()
 	// Logos don't require authentication so bypass that step
 	kubernetesRouter.Methods("GET").Handler(negroni.New(
 		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, kubernetesProxy)),
