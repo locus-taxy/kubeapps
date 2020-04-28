@@ -46,6 +46,37 @@ func init() {
 }
 
 //
+func kubeAPIHJandler(w http.ResponseWriter, r *http.Request) {
+	stack := r.Header.Get("Stack")
+	var proxyURL string = ""
+	if stack == "default" {
+		proxyURL = "https://35.200.215.243"
+	} else {
+		proxyURL = "https://35.200.215.243"
+	}
+	proxyParsedURL, err := url.Parse(proxyURL)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	proxy := httputil.NewSingleHostReverseProxy(proxyParsedURL)
+	caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
+	if err != nil {
+		log.Fatal("Unable to get the CA cert: %v", err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	proxy.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			RootCAs:      caCertPool,
+		},
+	}
+
+	proxy.ServeHTTP(w,r)
+
+}
+
 
 func main() {
 	pflag.Parse()
@@ -118,31 +149,11 @@ func main() {
 
 	//kubernetes API reverse proxy
 
-
-	//r.HandleFunc("/kube", kubeHandler)
-	parsedKubeAPIURL, err := url.Parse("https://35.200.215.243")
-	if err != nil {
-		log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
-	}
-	kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
-
-	caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
-	if err != nil {
-		log.Fatal("Unable to get the CA cert: %v", err)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	kubernetesProxy.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			RootCAs:      caCertPool,
-		},
-	}
-
 	kubernetesAPIPrefix := "/kube"
 	kubernetesRouter := r.PathPrefix(kubernetesAPIPrefix).Subrouter()
+
 	kubernetesRouter.Methods("GET").Handler(negroni.New(
-		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, kubernetesProxy)),
+		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, http.HandlerFunc(kubeAPIHJandler))),
 	))
 
 	n := negroni.Classic()
