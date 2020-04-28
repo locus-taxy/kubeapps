@@ -187,10 +187,7 @@ func main() {
 	))
 
 	// Backend routes unrelated to tiller-proxy functionality.
-	err = backendHandlers.SetupDefaultRoutes(r.PathPrefix("/backend/v1").Subrouter())
-	if err != nil {
-		log.Fatalf("Unable to setup backend routes: %+v", err)
-	}
+	backendHandlers.SetupDefaultRoutes(r.PathPrefix("/backend/v1").Subrouter())
 
 	// assetsvc reverse proxy
 	parsedAssetsvcURL, err := url.Parse(assetsvcURL)

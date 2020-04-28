@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -23,6 +24,7 @@ import (
 
 const (
 	authHeader     = "Authorization"
+	stackHeader    = "Stack"
 	namespaceParam = "namespace"
 	nameParam      = "releaseName"
 	authUserError  = "Unexpected error while configuring authentication"
@@ -34,7 +36,9 @@ const isV1SupportRequired = false
 // because a valid action config (and hence handler config) cannot be created until then.
 // If the handler config were a "this" argument instead of an explicit argument, it would be easy to create a handler with a "zero" config.
 // This approach practically eliminates that risk; it is much easier to use WithHandlerConfig to create a handler guaranteed to use a valid handler config.
+
 type dependentHandler func(cfg Config, w http.ResponseWriter, req *http.Request, params handlerutil.Params)
+type dependentBackendHandler func(authHandler kube.AuthHandler, w http.ResponseWriter, req *http.Request)
 
 // Options represents options that can be created without a bearer token, i.e. once at application startup.
 type Options struct {
@@ -79,7 +83,7 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 		return func(w http.ResponseWriter, req *http.Request, params handlerutil.Params) {
 			namespace := params[namespaceParam]
 			token := auth.ExtractToken(req.Header.Get(authHeader))
-
+			//stack := req.Header.Get(stackHeader)
 			// User configuration and clients, using user token
 			// Used to perform Helm operations
 			restConfig, err := NewClusterConfig(token, "test")
@@ -117,6 +121,32 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 		}
 	}
 }
+
+// AddRouteWith makes it easier to define routes in main.go and avoids code repetition.
+func AddBackendRouteWith(
+	r *mux.Router,
+	WithBackendHandlerConfig func(dependentBackendHandler) handlerutil.WithBackendParams,
+) func(verb, path string, handler dependentBackendHandler) {
+	return func(verb, path string, handler dependentBackendHandler) {
+		r.Methods(verb).Path(path).Handler(negroni.New(negroni.Wrap(WithBackendHandlerConfig(handler))))
+	}
+}
+
+func WithBackendHandlerConfig() func(f dependentBackendHandler) handlerutil.WithBackendParams {
+	return func(f dependentBackendHandler) handlerutil.WithBackendParams {
+		return func(w http.ResponseWriter, req *http.Request) {
+			//stack := req.Header.Get("Stack")
+			backendHandler, err := kube.NewHandler(os.Getenv("POD_NAMESPACE"), "test")
+			if err != nil {
+				log.Errorf("Failed to create handler: %v", err)
+				return
+			}
+			f(backendHandler, w, req)
+		}
+	}
+}
+
+
 
 // AddRouteWith makes it easier to define routes in main.go and avoids code repetition.
 func AddRouteWith(

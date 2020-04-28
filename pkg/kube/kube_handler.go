@@ -52,9 +52,9 @@ type combinedClientset struct {
 	*kubernetes.Clientset
 }
 
-// kubeHandler handles http requests for operating on app repositories and k8s resources
+// KubeHandler handles http requests for operating on app repositories and k8s resources
 // in Kubeapps, without exposing implementation details to 3rd party integrations.
-type kubeHandler struct {
+type KubeHandler struct {
 	// The config set internally here cannot be used on its own as a valid
 	// token is required. Call-sites use configForToken to obtain a valid
 	// config with a specific token.
@@ -74,7 +74,7 @@ type kubeHandler struct {
 	clientsetForConfig func(*rest.Config) (combinedClientsetInterface, error)
 }
 
-// userHandler is an extension of kubeHandler for a specific service account
+// userHandler is an extension of KubeHandler for a specific service account
 type userHandler struct {
 	// The namespace in which (currently) app repositories are created.
 	kubeappsNamespace string
@@ -100,7 +100,7 @@ type AuthHandler interface {
 	AsSVC() handler
 }
 
-func (a *kubeHandler) AsUser(token string) handler {
+func (a *KubeHandler) AsUser(token string) handler {
 	clientset, err := a.clientsetForConfig(a.configForToken(token))
 	if err != nil {
 		log.Errorf("unable to create clientset: %v", err)
@@ -112,7 +112,7 @@ func (a *kubeHandler) AsUser(token string) handler {
 	}
 }
 
-func (a *kubeHandler) AsSVC() handler {
+func (a *KubeHandler) AsSVC() handler {
 	return &userHandler{
 		kubeappsNamespace: a.kubeappsNamespace,
 		svcClientset:      a.svcClientset,
@@ -193,7 +193,7 @@ func NewHandler(kubeappsNamespace string, stack string) (AuthHandler, error) {
 		return nil, err
 	}
 
-	return &kubeHandler{
+	return &KubeHandler{
 		config:            *config,
 		kubeappsNamespace: kubeappsNamespace,
 		// See comment in the struct defn above.
@@ -216,13 +216,13 @@ func clientsetForConfig(config *rest.Config) (combinedClientsetInterface, error)
 }
 
 // configForToken returns a new config for a given auth token.
-func (a *kubeHandler) configForToken(token string) *rest.Config {
+func (a *KubeHandler) configForToken(token string) *rest.Config {
 	configCopy := a.config
 	configCopy.BearerToken = token
 	return &configCopy
 }
 
-func (a *kubeHandler) clientsetForRequest(token string) (combinedClientsetInterface, error) {
+func (a *KubeHandler) clientsetForRequest(token string) (combinedClientsetInterface, error) {
 	clientset, err := a.clientsetForConfig(a.configForToken(token))
 	if err != nil {
 		log.Errorf("unable to create clientset: %v", err)

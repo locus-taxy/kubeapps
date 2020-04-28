@@ -18,6 +18,7 @@ package auth
 
 import (
 	"fmt"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"regexp"
@@ -100,20 +101,29 @@ type Checker interface {
 }
 
 // NewAuth creates an auth agent
-func NewAuth(token string) (*UserAuth, error) {
-	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{},
-		&clientcmd.ConfigOverrides{
-			ClusterInfo: clientcmdapi.Cluster{
-				Server: "https://35.200.215.243",
-				CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
-			},
-		})
-	config, err := clientConfig.ClientConfig()
-	if err != nil {
-		return nil, err
+func NewAuth(token string, stack string) (*UserAuth, error) {
+	var config *rest.Config
+	if stack == "default" {
+		var err error
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			&clientcmd.ClientConfigLoadingRules{},
+			&clientcmd.ConfigOverrides{
+				ClusterInfo: clientcmdapi.Cluster{
+					Server: "https://35.200.215.243",
+					CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
+				},
+			})
+		config, err := clientConfig.ClientConfig()
+		if err != nil {
+			return nil, err
+		}
+		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 	}
-	config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
 	// Overwrite default token
 	config.BearerToken = token
 	config.BearerTokenFile = "" // https://github.com/kubeapps/kubeapps/pull/1359#issuecomment-564077326

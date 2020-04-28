@@ -45,27 +45,7 @@ func init() {
 	pflag.Int64Var(&timeout, "timeout", 300, "Timeout to perform release operations (install, upgrade, rollback, delete)")
 }
 
-func kubeProxyHandler(w http.ResponseWriter, r *http.Request){
-	parsedKubeAPIURL, err := url.Parse("https://35.200.215.243")
-	if err != nil {
-		log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
-	}
-	kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
-
-	caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
-	if err != nil {
-		log.Fatal("Unable to get the CA cert: %v", err)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	kubernetesProxy.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			RootCAs: caCertPool,
-		},
-	}
-	kubernetesProxy.ServeHTTP(w, r)
-}
+//
 
 func main() {
 	pflag.Parse()
@@ -110,10 +90,12 @@ func main() {
 	addRoute("DELETE", "/namespaces/{namespace}/releases/{releaseName}", handler.DeleteRelease)
 
 	// Backend routes unrelated to kubeops functionality.
-	err := backendHandlers.SetupDefaultRoutes(r.PathPrefix("/backend/v1").Subrouter())
-	if err != nil {
-		log.Fatalf("Unable to setup backend routes: %+v", err)
-	}
+
+	withBackendHandlerConfig := handler.WithBackendHandlerConfig()
+	addBackendRoute := handler.AddBackendRouteWith(r.PathPrefix("/backend/v1").Subrouter(), withBackendHandlerConfig)
+	addBackendRoute("GET", "/namespaces",backendHandlers.GetNamespaces)
+	addBackendRoute("POST", "/namespaces/{namespace}/apprepositories", backendHandlers.CreateAppRepository)
+	addBackendRoute("DELETE", "/namespaces/{namespace}/apprepositories/{name}", backendHandlers.DeleteAppRepository)
 
 	// assetsvc reverse proxy
 	authGate := auth.AuthGate()
@@ -136,31 +118,33 @@ func main() {
 
 	//kubernetes API reverse proxy
 
-	r.HandleFunc("/kube", kubeProxyHandler)
-	//parsedKubeAPIURL, err := url.Parse("https://35.200.215.243")
-	//if err != nil {
-	//	log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
-	//}
-	//kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
-	//
-	//caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
-	//if err != nil {
-	//	log.Fatal("Unable to get the CA cert: %v", err)
-	//}
-	//caCertPool := x509.NewCertPool()
-	//caCertPool.AppendCertsFromPEM(caCert)
-	//
-	//kubernetesProxy.Transport = &http.Transport{
-	//	TLSClientConfig: &tls.Config{
-	//		RootCAs:      caCertPool,
-	//	},
-	//}
-	//
 
-	//// Logos don't require authentication so bypass that step
-	//kubernetesRouter.Methods("GET").Handler(negroni.New(
-	//	negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, kubernetesProxy)),
-	//))
+	//r.HandleFunc("/kube", kubeHandler)
+	parsedKubeAPIURL, err := url.Parse("https://35.200.215.243")
+	if err != nil {
+		log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
+	}
+	kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
+
+	caCert, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt")
+	if err != nil {
+		log.Fatal("Unable to get the CA cert: %v", err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	kubernetesProxy.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			RootCAs:      caCertPool,
+		},
+	}
+
+	kubernetesAPIPrefix := "/kube"
+	kubernetesRouter := r.PathPrefix(kubernetesAPIPrefix).Subrouter()
+	// Logos don't require authentication so bypass that step
+	kubernetesRouter.Methods("GET").Handler(negroni.New(
+		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, kubernetesProxy)),
+	))
 
 	n := negroni.Classic()
 	n.UseHandler(r)
