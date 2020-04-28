@@ -100,29 +100,36 @@ type Checker interface {
 	GetForbiddenActions(namespace, action, manifest string) ([]Action, error)
 }
 
-// NewAuth creates an auth agent
-func NewAuth(token string, stack string) (*UserAuth, error) {
-	var config *rest.Config = nil
+func newAuthConfig(stack string) (*rest.Config, error){
 	if stack == "default" {
 		var err error
-		config, err = rest.InClusterConfig()
+		config, err := rest.InClusterConfig()
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{},
-			&clientcmd.ConfigOverrides{
-				ClusterInfo: clientcmdapi.Cluster{
-					Server: "https://35.200.215.243",
-					CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
-				},
-			})
-		config, err := clientConfig.ClientConfig()
-		if err != nil {
-			return nil, err
-		}
-		config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
+		return config, nil
+	}
+	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{},
+		&clientcmd.ConfigOverrides{
+			ClusterInfo: clientcmdapi.Cluster{
+				Server: "https://35.200.215.243",
+				CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
+			},
+		})
+	config, err := clientConfig.ClientConfig()
+	if err != nil {
+		return nil, err
+	}
+	config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
+	return config, nil
+}
+
+// NewAuth creates an auth agent
+func NewAuth(token string, stack string) (*UserAuth, error) {
+	config, err := newAuthConfig(stack)
+	if err != nil {
+		return nil, err
 	}
 	// Overwrite default token
 	config.BearerToken = token
