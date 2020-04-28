@@ -16,6 +16,7 @@ type Params map[string]string
 // WithParams can be used to wrap handlers to take an extra arg for path params
 type WithParams func(http.ResponseWriter, *http.Request, Params)
 type WithBackendParams func(http.ResponseWriter, *http.Request)
+type WithProxyParams func(http.ResponseWriter, *http.Request)
 
 func (h WithParams) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
@@ -23,6 +24,10 @@ func (h WithParams) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h WithBackendParams) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	h(w, req)
+}
+
+func (h WithProxyParams) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	h(w, req)
 }
 
