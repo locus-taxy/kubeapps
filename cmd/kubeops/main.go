@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -114,6 +115,10 @@ func main() {
 		log.Fatalf("Unable to parse the Kubernetes API URL: %v", err)
 	}
 	kubernetesProxy := httputil.NewSingleHostReverseProxy(parsedKubeAPIURL)
+	//Skip cert verify
+	kubernetesProxy.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	kubernetesAPIPrefix := "/kube"
 	kubernetesRouter := r.PathPrefix(kubernetesAPIPrefix).Subrouter()
 	// Logos don't require authentication so bypass that step
