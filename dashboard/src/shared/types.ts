@@ -378,6 +378,8 @@ export interface IAppOverview {
   icon?: string;
   status: string;
   chart: string;
+  description: string;
+  appVersion: string;
   chartMetadata: hapi.chart.Metadata;
   // UpdateInfo is internally populated
   updateInfo?: IChartUpdateInfo;
