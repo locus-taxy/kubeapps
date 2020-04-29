@@ -22,7 +22,7 @@ interface ILoginFormState {
 }
 
 class LoginForm extends React.Component<ILoginFormProps, ILoginFormState> {
-  public state: ILoginFormState = { token: "", stack: "" };
+  public state: ILoginFormState = { token: "", stack: "default" };
 
   public componentDidMount() {
     if (this.props.oauthLoginURI) {
@@ -124,8 +124,10 @@ class LoginForm extends React.Component<ILoginFormProps, ILoginFormState> {
                 value={this.state.token}
               />
               <label htmlFor="stack">Kubernetes API Token</label>
-              <select id="stack" value={this.state.stack} onChange={this.handleStackChange} required={true}>
-                <option selected={true} value="default">GCP</option>
+              <select id="stack" required={true} onChange={this.handleStackChange}>
+                <option selected={true} value="default">
+                  GCP
+                </option>
                 <option value="lazada">Lazada</option>
               </select>
             </div>

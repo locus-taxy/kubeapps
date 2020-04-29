@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"os"
@@ -64,11 +65,11 @@ func NewClusterConfig(token string, stack string) (config *rest.Config,err error
 			return
 		}
 	} else {
-		config, err =  clientcmd.BuildConfigFromFlags("https://35.200.215.243", "")
+		config, err =  clientcmd.BuildConfigFromFlags(os.Getenv(stack), "")
 		if err != nil {
 			return
 		}
-		config.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
+		config.CAFile = fmt.Sprintf("/var/run/secrets/kubernetes.io/custom/%s.crt", stack)
 	}
 	config.BearerToken = token
 	config.BearerTokenFile = ""
@@ -83,10 +84,10 @@ func WithHandlerConfig(storageForDriver agent.StorageForDriver, options Options)
 		return func(w http.ResponseWriter, req *http.Request, params handlerutil.Params) {
 			namespace := params[namespaceParam]
 			token := auth.ExtractToken(req.Header.Get(authHeader))
-			//stack := req.Header.Get(stackHeader)
+			stack := req.Header.Get(stackHeader)
 			// User configuration and clients, using user token
 			// Used to perform Helm operations
-			restConfig, err := NewClusterConfig(token, "test")
+			restConfig, err := NewClusterConfig(token, stack)
 			if err != nil {
 				log.Errorf("Failed to create in-cluster config with user token: %v", err)
 				response.NewErrorResponse(http.StatusInternalServerError, authUserError).Write(w)
@@ -135,8 +136,12 @@ func AddBackendRouteWith(
 func WithBackendHandlerConfig() func(f dependentBackendHandler) handlerutil.WithBackendParams {
 	return func(f dependentBackendHandler) handlerutil.WithBackendParams {
 		return func(w http.ResponseWriter, req *http.Request) {
-			//stack := req.Header.Get("Stack")
-			backendHandler, err := kube.NewHandler(os.Getenv("POD_NAMESPACE"), "test")
+			stack := req.Header.Get("Stack")
+			if stack == "" {
+				log.Errorf("Stack header is empty")
+				return
+			}
+			backendHandler, err := kube.NewHandler(os.Getenv("POD_NAMESPACE"), stack)
 			if err != nil {
 				log.Errorf("Failed to create handler: %v", err)
 				return

@@ -21,6 +21,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	"os"
 	"regexp"
 	"strings"
 
@@ -109,19 +110,20 @@ func newAuthConfig(stack string) (*rest.Config, error){
 		}
 		return config, nil
 	}
+	caFile := fmt.Sprintf("/var/run/secrets/kubernetes.io/custom/%s.crt", stack)
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		&clientcmd.ClientConfigLoadingRules{},
 		&clientcmd.ConfigOverrides{
 			ClusterInfo: clientcmdapi.Cluster{
-				Server: "https://35.200.215.243",
-				CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
+				Server: os.Getenv(stack),
+				CertificateAuthority: caFile,
 			},
 		})
 	config, err := clientConfig.ClientConfig()
 	if err != nil {
 		return nil, err
 	}
-	config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
+	config.TLSClientConfig.CAFile = caFile
 	return config, nil
 }
 

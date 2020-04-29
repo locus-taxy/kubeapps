@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	authorizationapi "k8s.io/api/authorization/v1"
@@ -158,19 +159,24 @@ func newHandlerStack(stack string) (*rest.Config, error){
 		}
 		return config, nil
 	}
+	caPath := fmt.Sprintf("/var/run/secrets/kubernetes.io/custom/%s.crt", stack)
+	serverURL := os.Getenv(stack)
+	if serverURL == "" {
+		return nil, fmt.Errorf("Kubernetes Stack not found")
+	}
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		&clientcmd.ClientConfigLoadingRules{},
 		&clientcmd.ConfigOverrides{
 			ClusterInfo: clientcmdapi.Cluster{
-				Server: "https://35.200.215.243",
-				CertificateAuthority: "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt",
+				Server: serverURL,
+				CertificateAuthority: caPath,
 			},
 		})
 	config, err := clientConfig.ClientConfig()
 	if err != nil {
 		return nil, err
 	}
-	config.TLSClientConfig.CAFile = "/var/run/secrets/kubernetes.io/GCP-DEVO/ca.crt"
+	config.TLSClientConfig.CAFile = caPath
 	return config, nil
 }
 func NewHandler(kubeappsNamespace string, stack string) (AuthHandler, error) {
