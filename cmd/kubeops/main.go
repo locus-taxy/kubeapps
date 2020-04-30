@@ -3,9 +3,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -50,13 +47,10 @@ func init() {
 func kubeAPIHJandler(w http.ResponseWriter, r *http.Request) {
 	stack := r.Header.Get("Stack")
 	var proxyURL string
-	var caCertFile string
 	if stack == "default" {
 		proxyURL = "https://kubernetes.default"
-		caCertFile = fmt.Sprintf("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
 	} else {
 		proxyURL = os.Getenv(stack)
-		caCertFile = fmt.Sprintf("/var/run/secrets/kubernetes.io/custom/%s.crt", stack)
 	}
 	if proxyURL == "" {
 		log.Errorf("Unknown kubernetes stack")
@@ -68,19 +62,9 @@ func kubeAPIHJandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	proxy := httputil.NewSingleHostReverseProxy(proxyParsedURL)
-	caCert, err := ioutil.ReadFile(caCertFile)
-	if err != nil {
-		log.Fatal("Unable to get the CA cert: %v", err)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
 	proxy.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			RootCAs:      caCertPool,
-		},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-
 	proxy.ServeHTTP(w,r)
 
 }
