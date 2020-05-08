@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -68,7 +69,28 @@ func kubeAPIHJandler(w http.ResponseWriter, r *http.Request) {
 	proxy.ServeHTTP(w,r)
 
 }
+func kubeAPIHandlerCustomAPI(w http.ResponseWriter, r *http.Request) {
+	stack := r.Header.Get("Stack")
+	var proxyURL string
+	if stack == "default" {
+		proxyURL = "https://kubernetes.default"
+		proxyParsedURL, err := url.Parse(proxyURL)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		proxy := httputil.NewSingleHostReverseProxy(proxyParsedURL)
+		proxy.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		proxy.ServeHTTP(w,r)
+	} else {
+		w.WriteHeader(200)
+		w.Header().Add("Content-Type", "application/json")
+		fmt.Fprintf(w, "{\"apiVersion\":\"kubeapps.com/v1alpha1\",\"items\":[],\"kind\":\"AppRepositoryList\"}")
+	}
 
+}
 
 func main() {
 	pflag.Parse()
@@ -143,7 +165,9 @@ func main() {
 
 	kubernetesAPIPrefix := "/kube"
 	kubernetesRouter := r.PathPrefix(kubernetesAPIPrefix).Subrouter()
-
+	kubernetesRouter.Methods("GET").Path("/apis/kubeapps.com/v1alpha1/namespaces/{namespace}/apprepositories").Handler(negroni.New(
+		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, http.HandlerFunc(kubeAPIHandlerCustomAPI))),
+	))
 	kubernetesRouter.Methods("GET").Handler(negroni.New(
 		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, http.HandlerFunc(kubeAPIHJandler))),
 	))
