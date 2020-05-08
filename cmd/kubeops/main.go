@@ -168,7 +168,7 @@ func main() {
 	kubernetesRouter.Methods("GET").Path("/apis/kubeapps.com/v1alpha1/namespaces/{namespace}/apprepositories").Handler(negroni.New(
 		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, http.HandlerFunc(kubeAPIHandlerCustomAPI))),
 	))
-	kubernetesRouter.Methods("GET").Handler(negroni.New(
+	kubernetesRouter.Methods("GET", "PUT").Handler(negroni.New(
 		negroni.Wrap(http.StripPrefix(kubernetesAPIPrefix, http.HandlerFunc(kubeAPIHJandler))),
 	))
 
