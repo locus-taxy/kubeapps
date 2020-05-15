@@ -73,6 +73,8 @@ type AppOverview struct {
 	ReleaseName   string         `json:"releaseName"`
 	Version       string         `json:"version"`
 	Namespace     string         `json:"namespace"`
+	Description   string         `json:"description"`
+	AppVersion    string         `json:"appVersion"`
 	Icon          string         `json:"icon,omitempty"`
 	Status        string         `json:"status"`
 	Chart         string         `json:"chart"`

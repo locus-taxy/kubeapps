@@ -28,6 +28,8 @@ class AppListItem extends React.Component<IAppListItemProps> {
         tag1Content={app.namespace}
         tag2Content={app.status.toLocaleLowerCase()}
         tag2Class={app.status.toLocaleLowerCase()}
+        description={app.description}
+        appVersion={app.appVersion}
       />
     );
   }
