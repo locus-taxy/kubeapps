@@ -8,7 +8,6 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
-import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
@@ -155,22 +154,13 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function DeploymentTableList({ versions, onVersionChange, releaseVersion }: IProps) {
   const classes = useStyles();
   const [selected, setSelected] = React.useState<string>();
-  const [page, setPage] = React.useState(0);
+  const [page] = React.useState(0);
   const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage] = React.useState(5);
 
   const handleClick = (name: string) => {
     setSelected(name);
     onVersionChange(name);
-  };
-
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
   };
 
   const handleChangeDense = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,15 +237,6 @@ export default function DeploymentTableList({ versions, onVersionChange, release
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50, 100]}
-          component="div"
-          count={versions.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
       </Paper>
       <FormControlLabel
         control={<Switch checked={dense} onChange={handleChangeDense} />}

@@ -38,7 +38,7 @@ class RollbackButton extends React.Component<IRollbackButtonProps> {
             currentRevision={this.props.revision}
           />
         </Modal>
-        <button className="button" onClick={this.openModal}>
+        <button className="button" disabled={true} onClick={this.openModal}>
           Rollback
         </button>
       </React.Fragment>

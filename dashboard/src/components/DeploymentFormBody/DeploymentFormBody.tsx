@@ -110,7 +110,12 @@ class DeploymentFormBody extends React.Component<
           <button className="button button-primary" type="submit">
             Submit
           </button>
-          <button className="button" type="button" onClick={this.openRestoreDefaultValuesModal}>
+          <button
+            className="button"
+            type="button"
+            disabled={true}
+            onClick={this.openRestoreDefaultValuesModal}
+          >
             Restore Chart Defaults
           </button>
           {goBack && (
